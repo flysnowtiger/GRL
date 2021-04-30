@@ -111,10 +111,10 @@ def main(args):
             g['lr'] = lr * g.get('lr_mult', 1)
 
     # Evaluator  测试
-    evaluator = ATTEvaluator(cnn_model, siamese_model)
+    evaluator = ATTEvaluator(cnn_model, siamese_model, only_eval=False)
     best_top1 = 0
     if args.evaluate == 1:
-        load_best_checkpoint(cnn_model, siamese_model, only_eval=False)
+        load_best_checkpoint(cnn_model, siamese_model)
         top1 = evaluator.evaluate(dataset.query, dataset.gallery, query_loader, gallery_loader, args.logs_dir, args.visual, args.rerank)
         print('best rank-1 accuracy is', top1)
     else:
