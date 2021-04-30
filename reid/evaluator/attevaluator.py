@@ -48,11 +48,12 @@ def cosin_dist(qf, gf):
 
 class ATTEvaluator(object):
 
-    def __init__(self, cnn_model, Siamese_model):
+    def __init__(self, cnn_model, Siamese_model, only_eval):
         super(ATTEvaluator, self).__init__()
         self.cnn_model = cnn_model
         self.siamese_model = Siamese_model
         self.softmax = nn.Softmax(dim=-1)
+        self.only_eval = only_eval
 
     @torch.no_grad()
     def extract_feature(self, data_loader):
@@ -75,7 +76,7 @@ class ATTEvaluator(object):
                             clips = imgs[y*8:(y+1)*8, :, :, :, :].cuda()  # 32, 8, c, h, w
                             x_uncorr, feats_corr = self.cnn_model(clips)
 
-                            out_frame, out_raw = self.siamese_model.self_attention(feats_corr)
+                            out_frame = self.siamese_model.self_attention(feats_corr)
                             out_feat = torch.cat((x_uncorr, out_frame, feats_corr.mean(dim=1)), dim=1)
 
                             feat_list.append(out_feat)
@@ -87,7 +88,7 @@ class ATTEvaluator(object):
                     else:
                         x_uncorr, feats_corr = self.cnn_model(imgs)
 
-                        out_frame, out_raw = self.siamese_model.self_attention(feats_corr)
+                        out_frame = self.siamese_model.self_attention(feats_corr)
                         out_feat = torch.cat((x_uncorr, out_frame, feats_corr.mean(dim=1)), dim=1)
 
                         out_feat = out_feat.view(n, -1)
@@ -107,7 +108,7 @@ class ATTEvaluator(object):
                 with torch.no_grad():
                     x_uncorr, feats_corr = self.cnn_model(imgs)
 
-                    out_frame, out_raw = self.siamese_model.self_attention(feats_corr)
+                    out_frame = self.siamese_model.self_attention(feats_corr)
                     out_feat = torch.cat((x_uncorr, out_frame, feats_corr.mean(dim=1)), dim=1)
 
                     qf.append(out_feat)

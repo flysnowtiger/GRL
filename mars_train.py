@@ -114,7 +114,7 @@ def main(args):
     evaluator = ATTEvaluator(cnn_model, siamese_model)
     best_top1 = 0
     if args.evaluate == 1:
-        load_best_checkpoint(cnn_model, siamese_model)
+        load_best_checkpoint(cnn_model, siamese_model, only_eval=False)
         top1 = evaluator.evaluate(dataset.query, dataset.gallery, query_loader, gallery_loader, args.logs_dir, args.visual, args.rerank)
         print('best rank-1 accuracy is', top1)
     else:
