@@ -5,4 +5,4 @@ python==3.6
 pytorch==1.0
 # Usage
 To train the model, please run
-python mars_data.py
+python mars_train.py
