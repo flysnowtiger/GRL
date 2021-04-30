@@ -38,6 +38,7 @@ class Backbone(nn.Module):
 		self.glo_fc = nn.Sequential(nn.Linear(2048, 1024),
 									  nn.BatchNorm1d(1024),
 									  nn.ReLU())
+
 		self.corr_atte = nn.Sequential(
 			nn.Conv2d(2048 + 1024, 1024, 1, 1, bias=False),
 			nn.BatchNorm2d(1024),
@@ -52,9 +53,8 @@ class Backbone(nn.Module):
 
 		x = self.base(x)
 
-		###Global correlation estimation
-
 		x_4 = x.view(b, t, x.size(1), x.size(2), x.size(3))
+
 		x_glo = x_4.mean(dim=-1).mean(dim=-1).mean(dim=1)
 		glo = self.glo_fc(x_glo).view(b,1, 1024, 1, 1).contiguous().expand(b,t, 1024, 16, 8).contiguous().view(b*t,1024, 16,8)
 
@@ -62,8 +62,7 @@ class Backbone(nn.Module):
 		corr_map = self.corr_atte(x_corr)
 		corr_map = F.sigmoid(corr_map).view(b * t, 1, 16, 8).contiguous()
 
-		# disentanglement
 		x_corr = x * corr_map
 		x_uncorr = x*(1-corr_map)
 
-		return x_uncorr, x_corr, corr_map
+		return  x_uncorr, x_corr, corr_map

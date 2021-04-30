@@ -68,25 +68,15 @@ def main(args):
         sys.stdout = Logger(osp.join(args.logs_dir, 'log_train{}.txt'.format(run)))
     print("==========\nArgs:{}\n==========".format(args))
 
-    # from reid.data import get_data ,根据get_data()函数,返回 数据集,行人数目,封装成batch的训练数据,查询数据,图库数据
     dataset, num_classes, train_loader, query_loader, gallery_loader = \
         get_data(args.dataset, args.split, args.data_dir,
                  args.batch_size, args.seq_len, args.seq_srd,
                  args.workers, only_eval=True)
 
-    # create CNN model  1.建立CNN模型,默认是resnet50 , num_features = 128
-    cnn_model = models.create(args.a1, num_features=args.features, dropout=args.dropout, numclasses=num_classes)
-
-    # create ATT model  2.建立注意力模型, 默认是attmodel
-    input_num = 2048  # 2048，CNN backbone 输出的特征维度
-    output_num = args.features  # 最后的特征向量维度
-    class_num = 2  # 2分类,正确分类为1,错误分类为0  BCE的类别
+    cnn_model = models.create(args.arch1, num_features=args.features, dropout=args.dropout, numclasses=num_classes)
 
     # create Siamese model
-    siamese_model = models.create(args.a2, input_num, output_num, class_num)
-    # create classifier model  3.建立一个分类模型
-
-    # CUDA acceleration model 4.模型的CUDA声明
+    siamese_model = models.create(args.arch2, input_num=args.features, output_num=512, class_num=2)
 
     cnn_model = torch.nn.DataParallel(cnn_model).to(device)
     siamese_model = siamese_model.to(device)

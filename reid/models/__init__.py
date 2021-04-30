@@ -1,15 +1,13 @@
 from __future__ import absolute_import
 from .resnet import *
-from .main_model import *
-from .Siamese_attention import Siamese_attention
-from .Siamese_video import Siamese_video
+from .grl_model import *
+from .Siamese import Siamese
 
 
 __factory = {
     'resnet50': resnet50,
+    'siamese': Siamese,
     'resnet50_grl': resnet50_grl,
-    'siamese_attention': Siamese_attention,
-    'siamese_video': Siamese_video,
 }
 
 

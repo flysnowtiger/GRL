@@ -1,8 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding:utf-8 -*-
-# @author = yuci
-# Date: 19-3-6 下午3:52
-
 
 from __future__ import print_function, absolute_import
 import os.path as osp

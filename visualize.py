@@ -1,7 +1,4 @@
-#!/usr/bin/env python
-# -*- coding:utf-8 -*-
-# @time:2019/6/5下午3:12
-# @Author: Yu Ci
+
 
 import torch
 import torch.nn.functional as F

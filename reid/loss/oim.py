@@ -44,7 +44,10 @@ class OIMLoss(nn.Module):
         self.size_average = size_average  # True
 
     def forward(self, inputs, targets):#
+
         inputs = oim(inputs, targets, self.lut, momentum=self.momentum)
+
         inputs *= self.scalar
+
         loss = F.cross_entropy(inputs, targets, weight=self.weight)
         return loss, inputs
