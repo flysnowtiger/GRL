@@ -2,11 +2,13 @@ from __future__ import absolute_import
 from .resnet import *
 from .grl_model import *
 from .Siamese import Siamese
+from .Siamese_video import Siamese_video
 
 
 __factory = {
     'resnet50': resnet50,
     'siamese': Siamese,
+    'siamese_video': Siamese_video,
     'resnet50_grl': resnet50_grl,
 }
 

@@ -75,9 +75,11 @@ def main(args):
     # create model
     cnn_model = models.create(args.arch1, num_features=args.features, dropout=args.dropout, numclasses=num_classes)
     siamese_model = models.create(args.arch2, input_num=args.features, output_num=512, class_num=2)
+    siamese_model_uncorr = models.create('siamese_video', input_num=2048, output_num=512, class_num=2)
 
     cnn_model = torch.nn.DataParallel(cnn_model).to(device)
     siamese_model = siamese_model.to(device)
+    siamese_model_uncorr = siamese_model_uncorr.to(device)
 
     # Loss function
     criterion_corr = OIMLoss(2048, num_classes, scalar=args.oim_scalar, momentum=args.oim_momentum)
@@ -97,6 +99,7 @@ def main(args):
         {'params': cnn_model.module.backbone.parameters(), 'lr_mult': 1},
         {'params': new_params, 'lr_mult': 2},
         {'params': siamese_model.parameters(), 'lr_mult': 2},
+        {'params': siamese_model_uncorr.parameters(), 'lr_mult': 2}
         ]
 
     optimizer = torch.optim.SGD(param_groups, lr=args.lr,
@@ -122,7 +125,7 @@ def main(args):
         tensorboard_train_logdir = osp.join(args.logs_dir, 'train_log')
         remove_repeat_tensorboard_files(tensorboard_train_logdir)
 
-        trainer = SEQTrainer(cnn_model, siamese_model, criterion_veri, criterion_corr, criterion_uncorr,
+        trainer = SEQTrainer(cnn_model, siamese_model, siamese_model_uncorr, criterion_veri, criterion_corr, criterion_uncorr,
                              tensorboard_train_logdir)
         for epoch in range(args.start_epoch, args.epochs):
             adjust_lr(epoch)

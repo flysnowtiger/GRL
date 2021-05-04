@@ -86,9 +86,10 @@ class BaseTrainer(object):
 
 class SEQTrainer(BaseTrainer):
 
-        def __init__(self, cnn_model, siamese_model, criterion_veri, criterion_corr, criterion_uncorr, logdir):
+        def __init__(self, cnn_model, siamese_model, siamese_model_uncorr, criterion_veri, criterion_corr, criterion_uncorr, logdir):
             super(SEQTrainer, self).__init__(cnn_model, criterion_veri)
             self.siamese_model = siamese_model
+            self.siamese_model_uncorr = siamese_model_uncorr
 
             self.criterion_uncorr = criterion_uncorr
             self.criterion_corr = criterion_corr
@@ -147,20 +148,18 @@ class SEQTrainer(BaseTrainer):
             encodemat0 = encodemat[:, :, 1]
             corr_loss_ver, corr_prec_ver = self.criterion(encodemat0, tar_probe, tar_gallery)
 
-            # encode_scores, siamese_out = self.siamese_model_uncorr(x_uncorr)
-            # uncorr_id_loss_vid, output_id2, lut2 = self.criterion_uncorr(siamese_out, target)
-            # uncorr_prec_id_vid, = accuracy(output_id2.data, target.data)
-            #
-            # # uncorr_loss_tri = criterion_triplet(siamese_out, target).mean()
-            #
-            # ### verification loss for pair-wise video feature
-            # encode_size = encode_scores.size()  # torch.Size([6, 6, 2])
-            # encodemat = encode_scores.view(-1, 2)  # torch.Size([36, 2])
-            # encodemat = F.softmax(encodemat, dim=-1)
-            # encodemat = encodemat.view(encode_size[0], encode_size[1], 2)  # torch.Size([6, 6, 2])
-            # encodemat0 = encodemat[:, :, 1]  # torch.Size([6, 6])  di er lie
-            # # encodemat1 = encodemat[:, :, 0]  # torch.Size([6, 6])  di er lie
-            # uncorr_loss_ver, uncorr_prec_ver = self.criterion_uncorr(encodemat0, tar_probe, tar_gallery)
+            encode_scores, siamese_out = self.siamese_model_uncorr(x_uncorr)
+            uncorr_id_loss_vid, output_id2, lut2 = self.criterion_uncorr(siamese_out, target)
+            uncorr_prec_id_vid, = accuracy(output_id2.data, target.data)
+            
+            # uncorr_loss_tri = criterion_triplet(siamese_out, target).mean()
+            
+            encode_size = encode_scores.size()  
+            encodemat = encode_scores.view(-1, 2)  
+            encodemat = F.softmax(encodemat, dim=-1)
+            encodemat = encodemat.view(encode_size[0], encode_size[1], 2)  
+            encodemat0 = encodemat[:, :, 1]  
+            uncorr_loss_ver, uncorr_prec_ver = self.criterion_uncorr(encodemat0, tar_probe, tar_gallery)
 
 
             corr_loss = corr_id_loss_frame + corr_id_loss_vid + corr_loss_ver*20 + corr_loss_tri
@@ -172,7 +171,7 @@ class SEQTrainer(BaseTrainer):
 
         def train(self, epoch, data_loader, optimizer1):
             self.siamese_model.train()
-            # self.siamese_model_uncorr.train()
+            self.siamese_model_uncorr.train()
 
             super(SEQTrainer, self).train(epoch, data_loader, optimizer1)
 
