@@ -18,8 +18,8 @@ class BaseTrainer(object):
     def __init__(self, model, criterion):
         super(BaseTrainer, self).__init__()
         self.model = model
-        self.criterion = criterion
-        self.criterion_uncorr = criterion
+        self.criterion_ver = criterion
+        self.criterion_ver_uncorr = criterion
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     def train(self, epoch, data_loader, optimizer1):
@@ -110,8 +110,8 @@ class SEQTrainer(BaseTrainer):
 
             x_uncorr, x_corr = self.model(inputs[0])
 
-            uncorr_id_loss_vid, output_id = self.criterion_uncorr(x_uncorr, targets)
-            uncorr_prec_id_vid, = accuracy(output_id.data, targets.data)
+            # uncorr_id_loss_vid, output_id = self.criterion_uncorr(x_uncorr, targets)
+            # uncorr_prec_id_vid, = accuracy(output_id.data, targets.data)
 
             # expand the target label ID loss
             frame_corr = x_corr.view(batch_size * seq_len, -1)
@@ -146,11 +146,11 @@ class SEQTrainer(BaseTrainer):
             encodemat = F.softmax(encodemat, dim=-1)
             encodemat = encodemat.view(encode_size[0], encode_size[1], 2)
             encodemat0 = encodemat[:, :, 1]
-            corr_loss_ver, corr_prec_ver = self.criterion(encodemat0, tar_probe, tar_gallery)
+            corr_loss_ver, corr_prec_ver = self.criterion_ver(encodemat0, tar_probe, tar_gallery)
 
             encode_scores, siamese_out = self.siamese_model_uncorr(x_uncorr)
-            uncorr_id_loss_vid, output_id2, lut2 = self.criterion_uncorr(siamese_out, target)
-            uncorr_prec_id_vid, = accuracy(output_id2.data, target.data)
+            uncorr_id_loss_vid, output_id = self.criterion_uncorr(siamese_out, target)
+            uncorr_prec_id_vid, = accuracy(output_id.data, target.data)
             
             # uncorr_loss_tri = criterion_triplet(siamese_out, target).mean()
             
@@ -159,7 +159,7 @@ class SEQTrainer(BaseTrainer):
             encodemat = F.softmax(encodemat, dim=-1)
             encodemat = encodemat.view(encode_size[0], encode_size[1], 2)  
             encodemat0 = encodemat[:, :, 1]  
-            uncorr_loss_ver, uncorr_prec_ver = self.criterion_uncorr(encodemat0, tar_probe, tar_gallery)
+            uncorr_loss_ver, uncorr_prec_ver = self.criterion_ver_uncorr(encodemat0, tar_probe, tar_gallery)
 
 
             corr_loss = corr_id_loss_frame + corr_id_loss_vid + corr_loss_ver*20 + corr_loss_tri
